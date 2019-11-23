@@ -5,7 +5,7 @@ from torch import nn
 
 
 class Generator(nn.Module):
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features):
         super(Generator, self).__init__()
 
         self.layers = nn.Sequential(
@@ -13,7 +13,7 @@ class Generator(nn.Module):
             nn.ReLU(),
             nn.Linear(1024, 1024),
             nn.ReLU(),
-            nn.Linear(1024, out_features),
+            nn.Linear(1024, 784),
             nn.Tanh()
         )
 
@@ -22,11 +22,11 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, in_features):
+    def __init__(self):
         super(Discriminator, self).__init__()
 
         self.layers = nn.Sequential(
-            nn.Linear(in_features, 256),
+            nn.Linear(784, 256),
             nn.LeakyReLU(),
             nn.Linear(256, 256),
             nn.LeakyReLU(),
@@ -35,3 +35,15 @@ class Discriminator(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
+
+
+class GAN(nn.Module):
+    def __init__(self, config):
+        super(GAN, self).__init__()
+
+        self.gen = Generator(config.noise_features)
+        if config.is_train:
+            self.dis = Discriminator()
+
+    def forward(self, x):
+        pass

@@ -9,6 +9,7 @@ config.tensorboard_dir = './tensorboard/'
 config.checkpoint_dir = './checkpoints/'
 
 config.batch_size = 0
+config.noise_features = 96
 config.num_workers = 0
 
 config.lr = 0
