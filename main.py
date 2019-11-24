@@ -9,6 +9,7 @@ from torchvision import datasets, transforms
 
 from config import config
 from models import GAN
+from utils import load_checkpoints
 
 
 def train(models, writer, device):
@@ -80,6 +81,11 @@ def train(models, writer, device):
 
             idx += 1
 
+    gen_path = os.path.join(config.checkpoint_dir, config.name, '{:02d}-gen.ckpt'.format(config.train_epochs))
+    dis_path = os.path.join(config.checkpoint_dir, config.name, '{:02d}-dis.ckpt'.format(config.train_epochs))
+    torch.save(models.gen.state_dict(), gen_path)
+    torch.save(models.dis.state_dict(), dis_path)
+
 
 def main():
     if not os.path.exists(os.path.join(config.tensorboard_dir, config.name)):
@@ -90,7 +96,7 @@ def main():
     device = torch.device('cuda:0' if config.use_cuda else 'cpu')
     models = GAN(config).to(device)
     if config.load_epoch != 0:
-        pass
+        load_checkpoints(models, config.checkpoint_dir, config.name, config.load_epoch)
 
     if config.is_train:
         models.train()
