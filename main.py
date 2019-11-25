@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+from sklearn.neighbors.kde import KernelDensity
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -87,6 +89,27 @@ def train(models, writer, device):
     torch.save(models.dis.state_dict(), dis_path)
 
 
+def test(models, device):
+    test_dataset = datasets.MNIST(config.dataset_dir, train=False, transform=transforms.ToTensor())
+    test_loader = DataLoader(test_dataset, batch_size=config.batch_size, num_workers=config.num_workers)
+
+    X_data = np.zeros((10000, 784), dtype=np.float32)
+    X_generated = np.zeros((10000, 784), dtype=np.float32)
+    with torch.no_grad():
+        for i, (data, _) in enumerate(test_loader):
+            noise = torch.rand((data.size(0), config.noise_features), device=device) * 2 - 1
+            generated = models.gen(noise)
+
+            start = i * config.batch_size
+            end = min((i + 1) * config.batch_size, 10000)
+            X_data[start:end] = data.view(-1, 784).numpy()
+            X_generated[start:end] = generated.cpu().numpy()
+
+    print("Calculating the score...")
+    kde = KernelDensity(bandwidth=0.2).fit(X_generated)
+    print("Score: {:.4f}".format(kde.score(X_data) / 10000))
+
+
 def main():
     if not os.path.exists(os.path.join(config.tensorboard_dir, config.name)):
         os.makedirs(os.path.join(config.tensorboard_dir, config.name))
@@ -104,6 +127,7 @@ def main():
         train(models, writer, device)
     else:
         models.eval()
+        test(models, device)
 
 
 if __name__ == '__main__':
