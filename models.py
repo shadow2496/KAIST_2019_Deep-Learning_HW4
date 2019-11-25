@@ -37,7 +37,9 @@ class Discriminator(nn.Module):
 
         self.layers = nn.Sequential(
             Maxout(784, 256),
+            nn.Dropout(),
             Maxout(256, 256),
+            nn.Dropout(),
             nn.Linear(256, 1)
         )
 
