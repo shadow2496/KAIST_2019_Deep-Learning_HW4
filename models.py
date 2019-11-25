@@ -1,7 +1,17 @@
+import torch
 from torch import nn
 
 
-# class Maxout(nn.Module)
+class Maxout(nn.Module):
+    def __init__(self, in_features, out_features):
+        super(Maxout, self).__init__()
+        self.layer1 = nn.Linear(in_features, out_features)
+        self.layer2 = nn.Linear(in_features, out_features)
+
+    def forward(self, x):
+        output1 = self.layer1(x)
+        output2 = self.layer2(x)
+        return torch.max(output1, output2)
 
 
 class Generator(nn.Module):
@@ -26,10 +36,8 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         self.layers = nn.Sequential(
-            nn.Linear(784, 256),
-            nn.LeakyReLU(),
-            nn.Linear(256, 256),
-            nn.LeakyReLU(),
+            Maxout(784, 256),
+            Maxout(256, 256),
             nn.Linear(256, 1)
         )
 
